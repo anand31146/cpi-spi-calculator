@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SPI/CPI Calculator - Sem 1 & 2</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f0f4f8;
+    }
+    h2 {
+      margin-top: 40px;
+      color: #333;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 20px;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 8px;
+      text-align: center;
+    }
+    select {
+      width: 100%;
+      padding: 4px;
+    }
+    .results {
+      font-size: 1.2em;
+      margin-top: 30px;
+    }
+    .results p {
+      margin: 6px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>SPI/CPI Calculator</h1>
+
+  <h2>Enter Details of Semester 1</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Subject</th>
+        <th>Credit</th>
+        <th>Grade</th>
+      </tr>
+    </thead>
+    <tbody id="sem1">
+      <!-- Semester 1 rows inserted by JS -->
+    </tbody>
+  </table>
+
+  <h2>Enter Details of Semester 2</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Subject</th>
+        <th>Credit</th>
+        <th>Grade</th>
+      </tr>
+    </thead>
+    <tbody id="sem2">
+      <!-- Semester 2 rows inserted by JS -->
+    </tbody>
+  </table>
+
+  <div class="results">
+    <p>SPI (Sem 1): <span id="spi1">0.00</span></p>
+    <p>SPI (Sem 2): <span id="spi2">0.00</span></p>
+    <p>CPI (After Sem 2): <span id="cpi">0.00</span></p>
+  </div>
+
+  <script>
+    const gradePoints = {
+      'AA': 10,
+      'AB': 9,
+      'BB': 8,
+      'BC': 7,
+      'CC': 6,
+      'CD': 5,
+      'DD': 4,
+      'FF': 0
+    };
+
+    function createRows(tbodyId, sem) {
+      const tbody = document.getElementById(tbodyId);
+      for (let i = 1; i <= 6; i++) {
+        const row = document.createElement('tr');
+
+        const subjectCell = document.createElement('td');
+        subjectCell.textContent = `SUB ${i}`;
+        row.appendChild(subjectCell);
+
+        const creditCell = document.createElement('td');
+        const creditSelect = document.createElement('select');
+        for (let c = 0; c <= 10; c += 0.5) {
+          const option = document.createElement('option');
+          option.value = c;
+          option.textContent = c;
+          creditSelect.appendChild(option);
+        }
+        creditCell.appendChild(creditSelect);
+        row.appendChild(creditCell);
+
+        const gradeCell = document.createElement('td');
+        const gradeSelect = document.createElement('select');
+        const grades = ['AA', 'AB', 'BB', 'BC', 'CC', 'CD', 'DD', 'FF'];
+        grades.forEach(grade => {
+          const option = document.createElement('option');
+          option.value = grade;
+          option.textContent = grade;
+          gradeSelect.appendChild(option);
+        });
+        gradeCell.appendChild(gradeSelect);
+        row.appendChild(gradeCell);
+
+        tbody.appendChild(row);
+      }
+    }
+
+    // Create both semester tables
+    createRows("sem1", 1);
+    createRows("sem2", 2);
+
+    function calculateSPI(rows) {
+      let totalCredits = 0;
+      let totalPoints = 0;
+
+      for (let row of rows) {
+        const credit = parseFloat(row.cells[1].firstChild.value);
+        const grade = row.cells[2].firstChild.value;
+        const point = gradePoints[grade];
+
+        totalCredits += credit;
+        totalPoints += credit * point;
+      }
+
+      const spi = totalCredits ? (totalPoints / totalCredits).toFixed(2) : '0.00';
+      return {
+        spi: spi,
+        credits: totalCredits,
+        points: totalPoints
+      };
+    }
+
+    function calculateAll() {
+      const sem1Rows = document.getElementById('sem1').getElementsByTagName('tr');
+      const sem2Rows = document.getElementById('sem2').getElementsByTagName('tr');
+
+      const sem1 = calculateSPI(sem1Rows);
+      const sem2 = calculateSPI(sem2Rows);
+
+      const totalCredits = sem1.credits + sem2.credits;
+      const totalPoints = sem1.points + sem2.points;
+      const cpi = totalCredits ? (totalPoints / totalCredits).toFixed(2) : '0.00';
+
+      document.getElementById('spi1').textContent = sem1.spi;
+      document.getElementById('spi2').textContent = sem2.spi;
+      document.getElementById('cpi').textContent = cpi;
+    }
+
+    // Attach event listeners to all dropdowns
+    document.querySelectorAll('select').forEach(select => {
+      select.addEventListener('change', calculateAll);
+    });
+
+    // Initial calculation
+    calculateAll();
+  </script>
+</body>
+</html>
